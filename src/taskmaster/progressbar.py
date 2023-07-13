@@ -8,24 +8,24 @@ taskmaster.progressbar
 
 from __future__ import absolute_import
 
-from progressbar import ProgressBar, UnknownLength, Counter, Timer
+from progressbar import Counter, ProgressBar, Timer, UnknownLength
 from progressbar.widgets import Widget
 
 
 class Speed(Widget):
-    'Widget for showing the rate.'
+    "Widget for showing the rate."
 
-    format = 'Rate:  %6.2f/s'
+    format = "Rate:  %6.2f/s"
 
     def __init__(self):
         self.startval = 0
 
     def update(self, pbar):
-        'Updates the widget with the current SI prefixed speed.'
+        "Updates the widget with the current SI prefixed speed."
 
         if self.startval == 0:
             self.startval = pbar.currval
-            return 'Rate:  --/s'
+            return "Rate:  --/s"
 
         speed = (pbar.currval - self.startval) / pbar.seconds_elapsed
 
@@ -33,7 +33,6 @@ class Speed(Widget):
 
 
 class Value(Widget):
-
     def __init__(self, label=None, callback=None):
         assert not (label and callback)
         self.label = label

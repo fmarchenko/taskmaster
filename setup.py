@@ -24,8 +24,7 @@ setup(
     install_requires=[
         'progressbar',
         'gevent',
-        'gevent_zeromq',
-        # 'pyzmq-static',
+        'pyzmq',
     ],
     tests_require=[
         'unittest2',

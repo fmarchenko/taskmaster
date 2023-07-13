@@ -6,12 +6,13 @@ taskmaster.consumer
 :license: Apache License 2.0, see LICENSE for more details.
 """
 
-import cPickle as pickle
+import pickle
 import gevent
-from gevent_zeromq import zmq
+import zmq.green as zmq
 from gevent.queue import Queue
-from taskmaster.constants import DEFAULT_LOG_LEVEL, DEFAULT_CALLBACK_TARGET
-from taskmaster.util import import_target, get_logger
+
+from taskmaster.constants import DEFAULT_CALLBACK_TARGET, DEFAULT_LOG_LEVEL
+from taskmaster.util import get_logger, import_target
 
 
 class Worker(object):
@@ -49,16 +50,16 @@ class Client(object):
         if self.client:
             self.poller.unregister(self.client)
             self.client.close()
-            self.logger.info('Reconnecting to server on %r', self.address)
+            self.logger.info("Reconnecting to server on %r", self.address)
         else:
-            self.logger.info('Connecting to server on %r', self.address)
+            self.logger.info("Connecting to server on %r", self.address)
 
         self.client = self.context.socket(zmq.REQ)
         self.client.setsockopt(zmq.LINGER, 0)
         self.client.connect(self.address)
         self.poller.register(self.client, zmq.POLLIN)
 
-    def send(self, cmd, data=''):
+    def send(self, cmd: bytes, data: bytes=b""):
         request = [cmd, data]
         retries = self.retries
         reply = None
@@ -102,7 +103,7 @@ class Client(object):
 
 class Consumer(object):
     def __init__(self, client, target, progressbar=True, log_level=DEFAULT_LOG_LEVEL):
-        if isinstance(target, basestring):
+        if isinstance(target, str):
             target = import_target(target, DEFAULT_CALLBACK_TARGET)
 
         self.client = client
@@ -117,9 +118,9 @@ class Consumer(object):
         self.logger = get_logger(self, log_level)
 
     def get_progressbar(self):
-        from taskmaster.progressbar import Counter, Speed, Timer, ProgressBar, UnknownLength
+        from taskmaster.progressbar import Counter, ProgressBar, Speed, Timer, UnknownLength
 
-        widgets = ['Tasks Completed: ', Counter(), ' | ', Speed(), ' | ', Timer()]
+        widgets = ["Tasks Completed: ", Counter(), " | ", Speed(), " | ", Timer()]
 
         pbar = ProgressBar(widgets=widgets, maxval=UnknownLength)
 
@@ -155,21 +156,21 @@ class Consumer(object):
             if not self._wants_job:
                 continue
 
-            reply = self.client.send('GET')
+            reply = self.client.send(b"GET")
             if not reply:
-                self.logger.error('No response from server; shutting down.')
+                self.logger.error("No response from server; shutting down.")
                 break
 
             cmd, data = reply
             # Reply can be "WAIT", "OK", or "ERROR"
-            if cmd == 'OK':
+            if cmd == b"OK":
                 self._wants_job = False
                 job = pickle.loads(data)
                 self.queue.put(job)
-            elif cmd == 'QUIT':
+            elif cmd == b"QUIT":
                 break
 
-        self.logger.info('Shutting down')
+        self.logger.info("Shutting down")
         self.shutdown()
 
     def shutdown(self):

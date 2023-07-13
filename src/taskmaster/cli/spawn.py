@@ -7,18 +7,14 @@ taskmaster.cli.spawn
 """
 
 from multiprocessing import Process
+
 from taskmaster.cli.slave import run as run_slave
-from taskmaster.constants import (
-    DEFAULT_ADDRESS,
-    DEFAULT_LOG_LEVEL,
-    DEFAULT_RETRIES,
-    DEFAULT_TIMEOUT,
-)
+from taskmaster.constants import DEFAULT_ADDRESS, DEFAULT_LOG_LEVEL, DEFAULT_RETRIES, DEFAULT_TIMEOUT
 
 
 def run(target, procs, **kwargs):
     pool = []
-    for n in xrange(procs):
+    for n in range(procs):
         pool.append(Process(target=run_slave, args=[target], kwargs=kwargs))
 
     for p in pool:
@@ -31,6 +27,7 @@ def run(target, procs, **kwargs):
 def main():
     import optparse
     import sys
+
     parser = optparse.OptionParser()
     parser.add_option("--address", dest="address", default=DEFAULT_ADDRESS)
     parser.add_option("--log-level", dest="log_level", default=DEFAULT_LOG_LEVEL)
@@ -38,9 +35,10 @@ def main():
     parser.add_option("--timeout", dest="timeout", default=DEFAULT_TIMEOUT, type=int)
     (options, args) = parser.parse_args()
     if len(args) != 2:
-        print 'Usage: tm-spawn <callback> <processes>'
+        print("Usage: tm-spawn <callback> <processes>")
         sys.exit(1)
     sys.exit(run(args[0], procs=int(args[1]), progressbar=False, **options.__dict__))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

@@ -26,7 +26,6 @@ Requirements **should** be handled by setuptools, but if they are not, you will 
 * progressbar
 * pyzmq (zeromq)
 * gevent
-* gevent_zeromq
 
 
 A note on Gevent
@@ -53,7 +52,7 @@ Create an iterator, and callback::
     def handle_job(i):
         # this **must** be idempotent, as resuming the process may execute a job
         # that had already been run
-        print "Got %r!" % i
+        print("Got %r!" % i)
 
 
 Spawn a master::
